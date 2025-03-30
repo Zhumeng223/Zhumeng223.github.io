@@ -16,18 +16,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" content="#f8f8f8">
   
-  <title>iOS资源整理 - 崔鑫的博客</title>
+  <title>探索Objective-C底层 - OC的本质 - 崔鑫的博客</title>
 
   
-    <meta name="description" content="RunTimeRuntime 10种用法（没有比这更全的了  开源项目成为iOS顶尖高手，你必须来这里(这里有最好的开源项目和文章)  MVVMTableView之MVVM与MVC之对比 使用MVVM减少控制器代码实战(减少56%) 面向协议的 MVVM 架构介绍  网络iOS 升级HTTPS通过ATS你所要知道的 iOS网络缓存扫盲篇–使用两行代码就能完成80%的缓存需求 iOS开发之AFNet">
+    <meta name="description" content="引言Objective-C（简称OC）作为iOS开发的核心语言，其底层实现机制一直是开发者进阶的必经之路。理解OC的本质不仅能帮助我们写出更高效的代码，还能深入掌握iOS运行时机制、内存管理等底层逻辑。本文将从以下几个维度展开分析： 一、OC的运行时机制（Objective-C Runtime）OC是一门动态语言，其核心特性依赖于objc库实现。运行时机制在程序运行时动态处理类、对象、方法调用等操">
 <meta property="og:type" content="article">
-<meta property="og:title" content="iOS资源整理">
-<meta property="og:url" content="http://example.com/2024/03/09/iOS%E8%B5%84%E6%BA%90%E6%95%B4%E7%90%86/index.html">
+<meta property="og:title" content="探索Objective-C底层 - OC的本质">
+<meta property="og:url" content="http://example.com/2022/01/01/%E6%8E%A2%E7%B4%A2Objective-C%E5%BA%95%E5%B1%82%20-%20OC%E7%9A%84%E6%9C%AC%E8%B4%A8/index.html">
 <meta property="og:site_name" content="崔鑫的博客">
-<meta property="og:description" content="RunTimeRuntime 10种用法（没有比这更全的了  开源项目成为iOS顶尖高手，你必须来这里(这里有最好的开源项目和文章)  MVVMTableView之MVVM与MVC之对比 使用MVVM减少控制器代码实战(减少56%) 面向协议的 MVVM 架构介绍  网络iOS 升级HTTPS通过ATS你所要知道的 iOS网络缓存扫盲篇–使用两行代码就能完成80%的缓存需求 iOS开发之AFNet">
+<meta property="og:description" content="引言Objective-C（简称OC）作为iOS开发的核心语言，其底层实现机制一直是开发者进阶的必经之路。理解OC的本质不仅能帮助我们写出更高效的代码，还能深入掌握iOS运行时机制、内存管理等底层逻辑。本文将从以下几个维度展开分析： 一、OC的运行时机制（Objective-C Runtime）OC是一门动态语言，其核心特性依赖于objc库实现。运行时机制在程序运行时动态处理类、对象、方法调用等操">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-03-08T16:00:00.000Z">
-<meta property="article:modified_time" content="2024-07-02T03:09:46.823Z">
+<meta property="article:published_time" content="2021-12-31T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-03-30T04:49:09.155Z">
 <meta property="article:author" content="崔鑫">
 <meta name="twitter:card" content="summary">
   
@@ -74,39 +74,126 @@
 <div class="article banner top">
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
-<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/iOS/">iOS</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/iOS/%E8%B5%84%E6%BA%90%E5%BA%93/">资源库</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-03-08T16:00:00.000Z">2024-03-09</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2024-07-02T03:09:46.823Z">2024-07-02</time></span></div></div></div>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/iOS/">iOS</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/iOS/Objective-C%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/">Objective-C底层原理</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2021-12-31T16:00:00.000Z">2022-01-01</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2025-03-30T04:49:09.155Z">2025-03-30</time></span></div></div></div>
     
     <div class="bottom only-title">
       
       <div class="text-area">
-        <h1 class="text title"><span>iOS资源整理</span></h1>
+        <h1 class="text title"><span>探索Objective-C底层 - OC的本质</span></h1>
         
       </div>
     </div>
     
   </div>
-  </div><article class="md-text content"><h2 id="RunTime"><a href="#RunTime" class="headerlink" title="RunTime"></a>RunTime</h2><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/3182646001d1">Runtime 10种用法（没有比这更全的了</a></p>
-<hr>
-<h2 id="开源项目"><a href="#开源项目" class="headerlink" title="开源项目"></a>开源项目</h2><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/8dda0caf47ea">成为iOS顶尖高手，你必须来这里(这里有最好的开源项目和文章)</a></p>
-<hr>
-<h2 id="MVVM"><a href="#MVVM" class="headerlink" title="MVVM"></a>MVVM</h2><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/d690b5d97201">TableView之MVVM与MVC之对比</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/f85363c82ea1">使用MVVM减少控制器代码实战(减少56%)</a></p>
-<p><a target="_blank" rel="noopener" href="https://realm.io/cn/news/doios-natasha-murashev-protocol-oriented-mvvm/">面向协议的 MVVM 架构介绍</a></p>
-<hr>
-<h2 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h2><p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/2d72ef8dbf5a">iOS 升级HTTPS通过ATS你所要知道的</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/fb5aaeac06ef">iOS网络缓存扫盲篇–使用两行代码就能完成80%的缓存需求</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/11bb0d4dc649">iOS开发之AFNetworking 3.0.4使用</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/95a368c6f7de">iOS开发 AFNetworking 3.0使用遇到的问题补充</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/4102b817ff2f">正确使用AFNetworking的SSL保证网络安全</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/8471b68203e8">iOS开发中WiFi相关功能总结</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/a6bab07c4062">iOS应用支持IPV6，就那点事儿</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/b4edfa0b71d8">基于iOS 10、realm封装的下载器（支持存储读取、断点续传、后台下载、杀死APP重启后的断点续传等功能）</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/d2582a8ab548">网络层的搭建需要解决哪些问题</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/30dd2f665933">YTKNetwork集成教程以及相关问题思考</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/03d5f1ef4b16">关于iOS工程中网络请求管理的头脑风暴</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/8be9b3204864">计算机网络中的TCP&#x2F;UDP协议到底是怎么回事（一）</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/eab86c0d1612">计算机网络中的TCP&#x2F;UDP协议到底是怎么回事（二）</a></p>
+  </div><article class="md-text content"><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>Objective-C（简称OC）作为iOS开发的核心语言，其底层实现机制一直是开发者进阶的必经之路。理解OC的本质不仅能帮助我们写出更高效的代码，还能深入掌握iOS运行时机制、内存管理等底层逻辑。本文将从以下几个维度展开分析：</p>
+<h2 id="一、OC的运行时机制（Objective-C-Runtime）"><a href="#一、OC的运行时机制（Objective-C-Runtime）" class="headerlink" title="一、OC的运行时机制（Objective-C Runtime）"></a>一、OC的运行时机制（Objective-C Runtime）</h2><p>OC是一门动态语言，其核心特性依赖于<code>objc</code>库实现。运行时机制在程序运行时动态处理类、对象、方法调用等操作，主要包含以下核心组件：</p>
+<h3 id="1-1-objc库的核心结构"><a href="#1-1-objc库的核心结构" class="headerlink" title="1.1 objc库的核心结构"></a>1.1 objc库的核心结构</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// objc.h中定义的核心结构体</span><br><span class="line">struct objc_class &#123;</span><br><span class="line">    Class _Nonnull isa  OBJC_ISA_AVAILABILITY;</span><br><span class="line">    // 其他字段...</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">struct objc_object &#123;</span><br><span class="line">    Class _Nonnull isa  OBJC_ISA_AVAILABILITY;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-动态语言特性"><a href="#1-2-动态语言特性" class="headerlink" title="1.2 动态语言特性"></a>1.2 动态语言特性</h3><ul>
+<li><strong>动态类型（Dynamic Typing）</strong>：对象类型检查在运行时完成</li>
+<li><strong>动态绑定（Dynamic Binding）</strong>：方法调用与实现的绑定在运行时确定</li>
+<li><strong>动态加载（Dynamic Loading）</strong>：程序运行时可加载新代码</li>
+</ul>
+<h2 id="二、对象与类的底层结构"><a href="#二、对象与类的底层结构" class="headerlink" title="二、对象与类的底层结构"></a>二、对象与类的底层结构</h2><h3 id="2-1-对象的本质"><a href="#2-1-对象的本质" class="headerlink" title="2.1 对象的本质"></a>2.1 对象的本质</h3><p>OC对象在底层由<code>objc_object</code>结构体表示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">struct objc_object &#123;</span><br><span class="line">    Class isa;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>isa指针</strong>：指向对象的类（Class）</li>
+<li><strong>类对象</strong>：存储方法列表、属性列表等元数据</li>
+</ul>
+<h3 id="2-2-类的结构"><a href="#2-2-类的结构" class="headerlink" title="2.2 类的结构"></a>2.2 类的结构</h3><p>类对象由<code>objc_class</code>结构体构成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">struct objc_class : objc_object &#123;</span><br><span class="line">    // Class ISA; 继承自objc_object</span><br><span class="line">    Class superclass;</span><br><span class="line">    cache_t cache;         // 方法缓存</span><br><span class="line">    class_data_bits_t bits; // 类数据</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-元类（Meta-Class）"><a href="#2-3-元类（Meta-Class）" class="headerlink" title="2.3 元类（Meta Class）"></a>2.3 元类（Meta Class）</h3><ul>
+<li>每个类都有对应的元类</li>
+<li>元类存储类方法（Class Method）</li>
+<li>根元类（Root Meta Class）的isa指针指向自身</li>
+</ul>
+<h2 id="三、消息传递与转发机制"><a href="#三、消息传递与转发机制" class="headerlink" title="三、消息传递与转发机制"></a>三、消息传递与转发机制</h2><h3 id="3-1-消息传递（Message-Passing）"><a href="#3-1-消息传递（Message-Passing）" class="headerlink" title="3.1 消息传递（Message Passing）"></a>3.1 消息传递（Message Passing）</h3><p>OC的方法调用本质是消息传递：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// OC代码</span><br><span class="line">[person run];</span><br><span class="line"></span><br><span class="line">// 底层实现</span><br><span class="line">objc_msgSend(person, @selector(run));</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-SEL与IMP"><a href="#3-2-SEL与IMP" class="headerlink" title="3.2 SEL与IMP"></a>3.2 SEL与IMP</h3><ul>
+<li><strong>SEL（Selector）</strong>：方法选择器，唯一标识一个方法</li>
+<li><strong>IMP（Implementation）</strong>：方法的具体实现，指向函数指针</li>
+</ul>
+<h3 id="3-3-动态方法决议"><a href="#3-3-动态方法决议" class="headerlink" title="3.3 动态方法决议"></a>3.3 动态方法决议</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">+ (BOOL)resolveInstanceMethod:(SEL)sel &#123;</span><br><span class="line">    if (sel == @selector(run)) &#123;</span><br><span class="line">        class_addMethod(self, sel, (IMP)runFunction, &quot;v@:&quot;);</span><br><span class="line">        return YES;</span><br><span class="line">    &#125;</span><br><span class="line">    return [super resolveInstanceMethod:sel];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-消息转发"><a href="#3-4-消息转发" class="headerlink" title="3.4 消息转发"></a>3.4 消息转发</h3><ol>
+<li>快速转发（Fast Forwarding）</li>
+<li>标准转发（Standard Forwarding）</li>
+<li>完整转发流程示例：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">- (id)forwardingTargetForSelector:(SEL)aSelector &#123;</span><br><span class="line">    return otherObject;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector &#123;</span><br><span class="line">    // 返回方法签名</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)forwardInvocation:(NSInvocation *)anInvocation &#123;</span><br><span class="line">    // 处理未识别的消息</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="四、内存管理机制"><a href="#四、内存管理机制" class="headerlink" title="四、内存管理机制"></a>四、内存管理机制</h2><h3 id="4-1-引用计数（Reference-Counting）"><a href="#4-1-引用计数（Reference-Counting）" class="headerlink" title="4.1 引用计数（Reference Counting）"></a>4.1 引用计数（Reference Counting）</h3><ul>
+<li><strong>retainCount</strong>：对象当前的引用计数</li>
+<li><strong>retain&#x2F;release&#x2F;autorelease</strong>：手动管理内存</li>
+<li><strong>autoreleasepool</strong>：自动释放池实现原理</li>
+</ul>
+<h3 id="4-2-ARC的底层实现"><a href="#4-2-ARC的底层实现" class="headerlink" title="4.2 ARC的底层实现"></a>4.2 ARC的底层实现</h3><ul>
+<li><strong>LLVM编译器</strong>自动插入内存管理代码</li>
+<li><strong>__strong&#x2F;__weak&#x2F;__unsafe_unretained</strong>修饰符</li>
+<li><strong>弱引用表（Side Table）</strong>的实现机制</li>
+</ul>
+<h3 id="4-3-僵尸对象（Zombie-Object）"><a href="#4-3-僵尸对象（Zombie-Object）" class="headerlink" title="4.3 僵尸对象（Zombie Object）"></a>4.3 僵尸对象（Zombie Object）</h3><ul>
+<li>调试工具：<code>NSZombieEnabled</code></li>
+<li>原理：对象释放后变为僵尸对象，防止野指针</li>
+</ul>
+<h2 id="五、OC与C-的关联"><a href="#五、OC与C-的关联" class="headerlink" title="五、OC与C++的关联"></a>五、OC与C++的关联</h2><h3 id="5-1-OC的动态特性与C-的对比"><a href="#5-1-OC的动态特性与C-的对比" class="headerlink" title="5.1 OC的动态特性与C++的对比"></a>5.1 OC的动态特性与C++的对比</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>OC</th>
+<th>C++</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>多态</td>
+<td>动态绑定</td>
+<td>静态绑定</td>
+</tr>
+<tr>
+<td>内存管理</td>
+<td>ARC&#x2F;MRC</td>
+<td>手动管理</td>
+</tr>
+<tr>
+<td>类型检查</td>
+<td>运行时</td>
+<td>编译时</td>
+</tr>
+</tbody></table>
+<h3 id="5-2-OC类的C-实现"><a href="#5-2-OC类的C-实现" class="headerlink" title="5.2 OC类的C++实现"></a>5.2 OC类的C++实现</h3><p>通过<code>clang -rewrite-objc</code>命令可以将OC代码转换为C++：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// OC代码</span><br><span class="line">@interface Person : NSObject</span><br><span class="line">@property (nonatomic, copy) NSString *name;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">// 转换后的C++代码</span><br><span class="line">struct Person_IMPL &#123;</span><br><span class="line">    struct NSObject_IMPL NSObject_IVARS;</span><br><span class="line">    NSString *_name;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="六、总结"><a href="#六、总结" class="headerlink" title="六、总结"></a>六、总结</h2><p>OC的本质是基于C语言的动态语言扩展，其底层实现涉及：</p>
+<ol>
+<li><strong>对象与类的结构设计</strong></li>
+<li><strong>消息传递与转发机制</strong></li>
+<li><strong>内存管理策略</strong></li>
+<li><strong>动态语言特性</strong></li>
+</ol>
+<p>掌握这些底层原理能帮助开发者：</p>
+<ul>
+<li>写出更高效、健壮的代码</li>
+<li>深入理解iOS框架设计思想</li>
+<li>解决复杂的内存问题</li>
+<li>实现高级特性（如AOP、热更新）</li>
+</ul>
+<p>建议开发者通过以下方式深入学习：</p>
+<ul>
+<li>阅读Apple官方文档《Objective-C Runtime Programming Guide》</li>
+<li>分析objc源码（<a target="_blank" rel="noopener" href="https://opensource.apple.com/tarballs/objc4/">Apple开源代码</a>）</li>
+<li>使用<code>class-dump</code>分析二进制文件</li>
+<li>通过LLDB调试运行时行为</li>
+</ul>
+<h2 id="附录：常用工具与命令"><a href="#附录：常用工具与命令" class="headerlink" title="附录：常用工具与命令"></a>附录：常用工具与命令</h2><ol>
+<li><code>clang -rewrite-objc</code>：将OC代码转换为C++</li>
+<li><code>class-dump</code>：解析二进制文件的类结构</li>
+<li><code>malloc_history</code>：追踪内存分配</li>
+<li><code>NSZombieEnabled</code>：调试僵尸对象</li>
+<li><code>objc_msgsend</code>：手动发送消息</li>
+</ol>
+<p>通过深入理解OC的底层原理，我们能真正掌握iOS开发的核心逻辑，写出更优秀的应用程序。</p>
 
 <div class="article-footer fs14">
     <section id="license">
@@ -116,7 +203,7 @@
     </section>
     </div>
 </article>
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/03/10/12%E7%A7%8DFlutter%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7%E6%8E%A8%E8%8D%90/">12种Flutter开发工具推荐</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2024/03/08/iOS%E5%BC%80%E5%8F%91%E5%85%B5%E5%99%A8%E8%BF%9B%E9%98%B6/">iOS开发兵器进阶</a></div></section></div>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/03/04/hello-world/">Hello World</a></div><div class="item" id="next"></div></section></div>
 
 
 
@@ -130,7 +217,7 @@
 
 
 
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#RunTime"><span class="toc-text">RunTime</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE"><span class="toc-text">开源项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MVVM"><span class="toc-text">MVVM</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C"><span class="toc-text">网络</span></a></li></ol></div><div class="widget-footer">
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81OC%E7%9A%84%E8%BF%90%E8%A1%8C%E6%97%B6%E6%9C%BA%E5%88%B6%EF%BC%88Objective-C-Runtime%EF%BC%89"><span class="toc-text">一、OC的运行时机制（Objective-C Runtime）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-objc%E5%BA%93%E7%9A%84%E6%A0%B8%E5%BF%83%E7%BB%93%E6%9E%84"><span class="toc-text">1.1 objc库的核心结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%8A%A8%E6%80%81%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7"><span class="toc-text">1.2 动态语言特性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AF%B9%E8%B1%A1%E4%B8%8E%E7%B1%BB%E7%9A%84%E5%BA%95%E5%B1%82%E7%BB%93%E6%9E%84"><span class="toc-text">二、对象与类的底层结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%9C%AC%E8%B4%A8"><span class="toc-text">2.1 对象的本质</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E7%B1%BB%E7%9A%84%E7%BB%93%E6%9E%84"><span class="toc-text">2.2 类的结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%85%83%E7%B1%BB%EF%BC%88Meta-Class%EF%BC%89"><span class="toc-text">2.3 元类（Meta Class）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92%E4%B8%8E%E8%BD%AC%E5%8F%91%E6%9C%BA%E5%88%B6"><span class="toc-text">三、消息传递与转发机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92%EF%BC%88Message-Passing%EF%BC%89"><span class="toc-text">3.1 消息传递（Message Passing）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-SEL%E4%B8%8EIMP"><span class="toc-text">3.2 SEL与IMP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%8A%A8%E6%80%81%E6%96%B9%E6%B3%95%E5%86%B3%E8%AE%AE"><span class="toc-text">3.3 动态方法决议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E6%B6%88%E6%81%AF%E8%BD%AC%E5%8F%91"><span class="toc-text">3.4 消息转发</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6"><span class="toc-text">四、内存管理机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0%EF%BC%88Reference-Counting%EF%BC%89"><span class="toc-text">4.1 引用计数（Reference Counting）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-ARC%E7%9A%84%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0"><span class="toc-text">4.2 ARC的底层实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E5%83%B5%E5%B0%B8%E5%AF%B9%E8%B1%A1%EF%BC%88Zombie-Object%EF%BC%89"><span class="toc-text">4.3 僵尸对象（Zombie Object）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81OC%E4%B8%8EC-%E7%9A%84%E5%85%B3%E8%81%94"><span class="toc-text">五、OC与C++的关联</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-OC%E7%9A%84%E5%8A%A8%E6%80%81%E7%89%B9%E6%80%A7%E4%B8%8EC-%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="toc-text">5.1 OC的动态特性与C++的对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-OC%E7%B1%BB%E7%9A%84C-%E5%AE%9E%E7%8E%B0"><span class="toc-text">5.2 OC类的C++实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-text">六、总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7%E4%B8%8E%E5%91%BD%E4%BB%A4"><span class="toc-text">附录：常用工具与命令</span></a></li></ol></div><div class="widget-footer">
 
 <a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a></div></widget>
 </div></aside><div class='float-panel blur'>
