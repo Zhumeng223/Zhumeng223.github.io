@@ -16,18 +16,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" content="#f8f8f8">
   
-  <title>探索Objective-C底层 - Runtime的相关应用 - 崔鑫的博客</title>
+  <title>探索Objective-C底层 - Runloop的底层原理 - 崔鑫的博客</title>
 
   
     <meta name="description" content="引言在iOS和macOS开发中，Runloop（运行循环）是一个非常重要的概念，它是程序运行的核心机制之一。理解Runloop的底层原理，对于解决诸如界面卡顿、定时器失效、线程保活等问题具有重要意义。本文将深入剖析Runloop的底层实现，带你了解其背后的奥秘。 一、Runloop的基本概念1.1 定义Runloop是一种事件处理循环机制，它可以让线程在没有任务时进入休眠状态，有任务时被唤醒并处理">
 <meta property="og:type" content="article">
-<meta property="og:title" content="探索Objective-C底层 - Runtime的相关应用">
+<meta property="og:title" content="探索Objective-C底层 - Runloop的底层原理">
 <meta property="og:url" content="http://example.com/2022/02/15/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20Runloop%E7%9A%84%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/index.html">
 <meta property="og:site_name" content="崔鑫的博客">
 <meta property="og:description" content="引言在iOS和macOS开发中，Runloop（运行循环）是一个非常重要的概念，它是程序运行的核心机制之一。理解Runloop的底层原理，对于解决诸如界面卡顿、定时器失效、线程保活等问题具有重要意义。本文将深入剖析Runloop的底层实现，带你了解其背后的奥秘。 一、Runloop的基本概念1.1 定义Runloop是一种事件处理循环机制，它可以让线程在没有任务时进入休眠状态，有任务时被唤醒并处理">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-02-14T16:00:00.000Z">
-<meta property="article:modified_time" content="2025-03-30T07:34:06.424Z">
+<meta property="article:modified_time" content="2025-03-30T09:41:24.143Z">
 <meta property="article:author" content="崔鑫">
 <meta name="twitter:card" content="summary">
   
@@ -62,7 +62,7 @@
 <div class="widgets">
 
 
-<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2022/02/15/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20Runloop%E7%9A%84%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"><span class="title">探索Objective-C底层 - Runtime的相关应用</span></a><a class="item title" href="/2022/02/10/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20Runtime%E7%9A%84%E7%9B%B8%E5%85%B3%E5%BA%94%E7%94%A8/"><span class="title">探索Objective-C底层 - Runtime的相关应用</span></a><a class="item title" href="/2022/02/06/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20Runtime%EF%BC%88%E4%BA%8C%EF%BC%89/"><span class="title">探索Objective-C底层 - Runtime（二）</span></a><a class="item title" href="/2022/02/04/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20Runtime%EF%BC%88%E4%B8%80%EF%BC%89/"><span class="title">探索Objective-C底层 - Runtime（一）</span></a><a class="item title" href="/2022/01/29/%E6%8E%A2%E7%B4%A2Objective-C%E5%BA%95%E5%B1%82%20-%20Block%E7%9A%84%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/"><span class="title">探索Objective-C底层 - Block的底层原理</span></a><a class="item title" href="/2022/01/22/%E6%8E%A2%E7%B4%A2Objective-C%E5%BA%95%E5%B1%82%20-%20Block%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/"><span class="title">探索Objective-C底层 - Block的基本使用</span></a><a class="item title" href="/2022/01/07/%E6%8E%A2%E7%B4%A2Objective-C%E5%BA%95%E5%B1%82%20-%20Category/"><span class="title">探索Objective-C底层 - Category</span></a><a class="item title" href="/2022/01/10/%E6%8E%A2%E7%B4%A2Objective-C%E5%BA%95%E5%B1%82%20-%20KVO/"><span class="title">探索Objective-C底层 - KVO</span></a><a class="item title" href="/2022/01/15/%E6%8E%A2%E7%B4%A2Objective-C%E5%BA%95%E5%B1%82%20-%20KVC/"><span class="title">探索Objective-C底层 - KVC</span></a><a class="item title" href="/2022/01/04/%E6%8E%A2%E7%B4%A2Objective-C%E5%BA%95%E5%B1%82%20-%20OC%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%9C%AC%E8%B4%A8/"><span class="title">探索Objective-C底层 - OC对象的本质</span></a></div></widget>
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2022/01/01/%E6%8E%A2%E7%B4%A2%20Objective%20-%20C%20%E5%BA%95%E5%B1%82%20-%20%E7%B3%BB%E5%88%97%E5%8D%9A%E5%AE%A2%E5%89%8D%E8%A8%80/"><span class="title">探索Objective-C底层</span></a><a class="item title" href="/2022/04/27/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%BC%80%E5%8F%91%E7%BB%9F%E8%AE%A1/"><span class="title">探索Objective-C底层 - 开发统计</span></a><a class="item title" href="/2022/04/16/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/"><span class="title">探索Objective-C底层 - 架构设计</span></a><a class="item title" href="/2022/04/09/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"><span class="title">探索Objective-C底层 - 性能优化</span></a><a class="item title" href="/2022/04/01/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/"><span class="title">探索Objective-C底层 - 内存管理</span></a><a class="item title" href="/2022/03/20/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8A%80%E6%9C%AF/"><span class="title">探索Objective-C底层 - 多线程技术</span></a><a class="item title" href="/2022/03/12/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E7%BA%BF%E7%A8%8B%E9%94%81/"><span class="title">探索Objective-C底层 - 线程锁</span></a><a class="item title" href="/2022/03/02/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20GCD/"><span class="title">探索Objective-C底层 - GCD</span></a><a class="item title" href="/2022/02/25/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%BB%8B%E7%BB%8D/"><span class="title">探索Objective-C底层 - 多线程介绍</span></a><a class="item title" href="/2022/02/19/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20Runloop%E7%9A%84%E5%BA%94%E7%94%A8/"><span class="title">探索Objective-C底层 - Runloop的应用</span></a></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
@@ -75,12 +75,12 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/iOS/">iOS</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/iOS/Objective-C%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/">Objective-C底层原理</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2022-02-14T16:00:00.000Z">2022-02-15</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2025-03-30T07:34:06.424Z">2025-03-30</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2022-02-14T16:00:00.000Z">2022-02-15</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2025-03-30T09:41:24.143Z">2025-03-30</time></span></div></div></div>
     
     <div class="bottom only-title">
       
       <div class="text-area">
-        <h1 class="text title"><span>探索Objective-C底层 - Runtime的相关应用</span></h1>
+        <h1 class="text title"><span>探索Objective-C底层 - Runloop的底层原理</span></h1>
         
       </div>
     </div>
@@ -179,7 +179,7 @@
     </section>
     </div>
 </article>
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/03/04/hello-world/">Hello World</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2022/02/10/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20Runtime%E7%9A%84%E7%9B%B8%E5%85%B3%E5%BA%94%E7%94%A8/">探索Objective-C底层 - Runtime的相关应用</a></div></section></div>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2022/02/19/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20Runloop%E7%9A%84%E5%BA%94%E7%94%A8/">探索Objective-C底层 - Runloop的应用</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2022/02/10/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20Runtime%E7%9A%84%E7%9B%B8%E5%85%B3%E5%BA%94%E7%94%A8/">探索Objective-C底层 - Runtime的相关应用</a></div></section></div>
 
 
 

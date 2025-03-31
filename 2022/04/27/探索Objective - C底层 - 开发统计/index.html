@@ -1,0 +1,603 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.27.0" theme-name="Stellar" theme-version="1.27.0">
+  
+  <meta name="generator" content="Hexo 7.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  
+  <title>探索Objective-C底层 - 开发统计 - 崔鑫的博客</title>
+
+  
+    <meta name="description" content="引言在iOS开发过程中，开发统计是一项至关重要的工作。通过对各种数据进行统计和分析，我们可以深入了解应用的运行状况、用户行为以及潜在的问题，从而为优化应用、提升用户体验提供有力的支持。本文将详细介绍在Objective - C开发中常见的开发统计知识点，包括崩溃率统计、用户数量统计、埋点统计功能用户数量以及用户操作步骤统计等，并结合具体的例子进行说明，同时阐述这些统计方案的实现原理。 一、崩溃率统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="探索Objective-C底层 - 开发统计">
+<meta property="og:url" content="http://example.com/2022/04/27/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%BC%80%E5%8F%91%E7%BB%9F%E8%AE%A1/index.html">
+<meta property="og:site_name" content="崔鑫的博客">
+<meta property="og:description" content="引言在iOS开发过程中，开发统计是一项至关重要的工作。通过对各种数据进行统计和分析，我们可以深入了解应用的运行状况、用户行为以及潜在的问题，从而为优化应用、提升用户体验提供有力的支持。本文将详细介绍在Objective - C开发中常见的开发统计知识点，包括崩溃率统计、用户数量统计、埋点统计功能用户数量以及用户操作步骤统计等，并结合具体的例子进行说明，同时阐述这些统计方案的实现原理。 一、崩溃率统">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-04-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-03-31T12:18:26.174Z">
+<meta property="article:author" content="崔鑫">
+<meta name="twitter:card" content="summary">
+  
+  
+  
+  
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.27.0">
+
+  
+
+  
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/xaoxuu/favicon/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/xaoxuu/favicon/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/xaoxuu/favicon/favicon-16x16.png"><link rel="manifest" href="/assets/xaoxuu/favicon/site.webmanifest"><link rel="shortcut icon" href="/assets/xaoxuu/favicon/favicon.ico"><meta name="theme-color" content="#f8f8f8"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/lxgw-wenkai-screen-webfont/1.7.0/style.min.css" media="all" />
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><div class="icon"><img no-lazy class="icon" src="/images/avatar/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></div><a class="title" href="/"><div class="main" ff="title">崔鑫的博客</div><div class="sub normal cap">活着就是折腾</div><div class="sub hover cap" style="opacity:0"> Life is a struggle</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2022/01/01/%E6%8E%A2%E7%B4%A2%20Objective%20-%20C%20%E5%BA%95%E5%B1%82%20-%20%E7%B3%BB%E5%88%97%E5%8D%9A%E5%AE%A2%E5%89%8D%E8%A8%80/"><span class="title">探索Objective-C底层</span></a><a class="item title" href="/2022/04/27/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%BC%80%E5%8F%91%E7%BB%9F%E8%AE%A1/"><span class="title">探索Objective-C底层 - 开发统计</span></a><a class="item title" href="/2022/04/16/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/"><span class="title">探索Objective-C底层 - 架构设计</span></a><a class="item title" href="/2022/04/09/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"><span class="title">探索Objective-C底层 - 性能优化</span></a><a class="item title" href="/2022/04/01/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/"><span class="title">探索Objective-C底层 - 内存管理</span></a><a class="item title" href="/2022/03/20/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8A%80%E6%9C%AF/"><span class="title">探索Objective-C底层 - 多线程技术</span></a><a class="item title" href="/2022/03/12/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E7%BA%BF%E7%A8%8B%E9%94%81/"><span class="title">探索Objective-C底层 - 线程锁</span></a><a class="item title" href="/2022/03/02/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20GCD/"><span class="title">探索Objective-C底层 - GCD</span></a><a class="item title" href="/2022/02/25/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%BB%8B%E7%BB%8D/"><span class="title">探索Objective-C底层 - 多线程介绍</span></a><a class="item title" href="/2022/02/19/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20Runloop%E7%9A%84%E5%BA%94%E7%94%A8/"><span class="title">探索Objective-C底层 - Runloop的应用</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/iOS/">iOS</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/iOS/Objective-C%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/">Objective-C底层原理</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2022-04-26T16:00:00.000Z">2022-04-27</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2025-03-31T12:18:26.174Z">2025-03-31</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>探索Objective-C底层 - 开发统计</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>在iOS开发过程中，开发统计是一项至关重要的工作。通过对各种数据进行统计和分析，我们可以深入了解应用的运行状况、用户行为以及潜在的问题，从而为优化应用、提升用户体验提供有力的支持。本文将详细介绍在Objective - C开发中常见的开发统计知识点，包括崩溃率统计、用户数量统计、埋点统计功能用户数量以及用户操作步骤统计等，并结合具体的例子进行说明，同时阐述这些统计方案的实现原理。</p>
+<h2 id="一、崩溃率统计：使用Bugly"><a href="#一、崩溃率统计：使用Bugly" class="headerlink" title="一、崩溃率统计：使用Bugly"></a>一、崩溃率统计：使用Bugly</h2><h3 id="1-1-Bugly简介"><a href="#1-1-Bugly简介" class="headerlink" title="1.1 Bugly简介"></a>1.1 Bugly简介</h3><p>Bugly是腾讯提供的一款专业的应用崩溃分析工具，它可以帮助开发者快速定位和解决应用中的崩溃问题。通过Bugly，我们可以实时监控应用的崩溃率，查看崩溃报告，分析崩溃原因，从而及时修复问题，提高应用的稳定性。</p>
+<h3 id="1-2-集成Bugly"><a href="#1-2-集成Bugly" class="headerlink" title="1.2 集成Bugly"></a>1.2 集成Bugly</h3><p>首先，我们需要在项目中集成Bugly SDK。可以通过CocoaPods进行集成，在<code>Podfile</code>中添加以下内容：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod <span class="string">&#x27;Bugly&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>然后在终端执行<code>pod install</code>命令进行安装。</p>
+<h3 id="1-3-初始化Bugly"><a href="#1-3-初始化Bugly" class="headerlink" title="1.3 初始化Bugly"></a>1.3 初始化Bugly</h3><p>在<code>AppDelegate.m</code>文件中进行Bugly的初始化：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#import &quot;AppDelegate.h&quot;</span><br><span class="line">#import &lt;Bugly/Bugly.h&gt;</span><br><span class="line"></span><br><span class="line">@implementation AppDelegate</span><br><span class="line"></span><br><span class="line">- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions &#123;</span><br><span class="line">    // 初始化Bugly</span><br><span class="line">    [Bugly startWithAppId:@&quot;your_app_id&quot;];</span><br><span class="line">    return YES;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>将<code>your_app_id</code>替换为你在Bugly平台上申请的App ID。</p>
+<h3 id="1-4-可能造成崩溃的地方及解决方法"><a href="#1-4-可能造成崩溃的地方及解决方法" class="headerlink" title="1.4 可能造成崩溃的地方及解决方法"></a>1.4 可能造成崩溃的地方及解决方法</h3><h4 id="1-4-1-空指针异常"><a href="#1-4-1-空指针异常" class="headerlink" title="1.4.1 空指针异常"></a>1.4.1 空指针异常</h4><p>空指针异常是最常见的崩溃原因之一，当我们尝试访问一个空对象的属性或方法时，就会导致崩溃。</p>
+<p><strong>示例代码</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NSString *str = nil;</span><br><span class="line">NSLog(@&quot;%@&quot;, [str uppercaseString]); // 这里会导致崩溃</span><br></pre></td></tr></table></figure>
+<p><strong>解决方法</strong>：在访问对象的属性或方法之前，先进行空值判断。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">NSString *str = nil;</span><br><span class="line">if (str) &#123;</span><br><span class="line">    NSLog(@&quot;%@&quot;, [str uppercaseString]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-4-2-数组越界"><a href="#1-4-2-数组越界" class="headerlink" title="1.4.2 数组越界"></a>1.4.2 数组越界</h4><p>当我们访问数组中不存在的索引时，会导致数组越界崩溃。</p>
+<p><strong>示例代码</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NSArray *array = @[@&quot;a&quot;, @&quot;b&quot;, @&quot;c&quot;];</span><br><span class="line">NSLog(@&quot;%@&quot;, array[3]); // 数组索引越界，会导致崩溃</span><br></pre></td></tr></table></figure>
+<p><strong>解决方法</strong>：在访问数组元素之前，先检查索引是否在有效范围内。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">NSArray *array = @[@&quot;a&quot;, @&quot;b&quot;, @&quot;c&quot;];</span><br><span class="line">NSInteger index = 3;</span><br><span class="line">if (index &gt;= 0 &amp;&amp; index &lt; array.count) &#123;</span><br><span class="line">    NSLog(@&quot;%@&quot;, array[index]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-4-3-未实现的方法调用"><a href="#1-4-3-未实现的方法调用" class="headerlink" title="1.4.3 未实现的方法调用"></a>1.4.3 未实现的方法调用</h4><p>当我们调用一个对象未实现的方法时，会导致崩溃。</p>
+<p><strong>示例代码</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@interface MyClass : NSObject</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation MyClass</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">MyClass *obj = [[MyClass alloc] init];</span><br><span class="line">[obj performSelector:@selector(nonExistentMethod)]; // 调用未实现的方法，会导致崩溃</span><br></pre></td></tr></table></figure>
+<p><strong>解决方法</strong>：在调用方法之前，先检查对象是否实现了该方法。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@interface MyClass : NSObject</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation MyClass</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">MyClass *obj = [[MyClass alloc] init];</span><br><span class="line">if ([obj respondsToSelector:@selector(nonExistentMethod)]) &#123;</span><br><span class="line">    [obj performSelector:@selector(nonExistentMethod)];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-4-4-内存泄漏"><a href="#1-4-4-内存泄漏" class="headerlink" title="1.4.4 内存泄漏"></a>1.4.4 内存泄漏</h4><p>内存泄漏会导致应用的内存占用不断增加，最终可能导致崩溃。</p>
+<p><strong>示例代码</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">@interface MyObject : NSObject</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation MyObject</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">while (1) &#123;</span><br><span class="line">    MyObject *obj = [[MyObject alloc] init];</span><br><span class="line">    // 没有释放对象，会导致内存泄漏</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>解决方法</strong>：确保在不需要使用对象时，及时释放对象的内存。可以使用ARC（自动引用计数）来管理内存，避免手动管理内存带来的问题。</p>
+<h3 id="1-5-Bugly实现原理"><a href="#1-5-Bugly实现原理" class="headerlink" title="1.5 Bugly实现原理"></a>1.5 Bugly实现原理</h3><p>Bugly的实现原理主要基于以下几个方面：</p>
+<ul>
+<li><strong>异常捕获</strong>：Bugly SDK会在应用启动时注册异常处理回调函数，当应用发生崩溃时，系统会触发这些回调函数。Bugly会捕获这些异常信息，包括崩溃的堆栈信息、设备信息、应用版本信息等。</li>
+<li><strong>数据收集</strong>：Bugly会收集崩溃现场的各种数据，如线程状态、内存信息、CPU信息等，这些数据有助于更全面地分析崩溃原因。</li>
+<li><strong>数据上传</strong>：Bugly将收集到的崩溃数据加密后上传到Bugly服务器。上传过程采用了安全的传输协议，确保数据的安全性。</li>
+<li><strong>符号化处理</strong>：服务器接收到崩溃数据后，需要对堆栈信息进行符号化处理。符号化是将崩溃堆栈中的内存地址转换为具体的方法名、文件名和行号的过程。这需要使用应用的符号表文件（DSYM文件）。</li>
+<li><strong>崩溃报告生成</strong>：经过符号化处理后，Bugly服务器会生成详细的崩溃报告，包括崩溃的基本信息、堆栈信息、设备信息等，开发者可以在Bugly平台上查看这些报告。</li>
+</ul>
+<h3 id="1-6-上传符号表的过程"><a href="#1-6-上传符号表的过程" class="headerlink" title="1.6 上传符号表的过程"></a>1.6 上传符号表的过程</h3><p>上传符号表是为了让Bugly能够将崩溃堆栈中的内存地址转换为具体的方法名、文件名和行号，从而更方便地定位崩溃问题。以下是上传符号表的具体步骤：</p>
+<h4 id="1-6-1-获取DSYM文件"><a href="#1-6-1-获取DSYM文件" class="headerlink" title="1.6.1 获取DSYM文件"></a>1.6.1 获取DSYM文件</h4><p>在Xcode中，当我们打包应用时，Xcode会自动生成DSYM文件。DSYM文件包含了应用的符号信息，它与应用的二进制文件是一一对应的。DSYM文件通常位于以下路径：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~/Library/Developer/Xcode/Archives/[日期]/[应用名称].xcarchive/dSYMs/[应用名称].app.dSYM</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-6-2-上传DSYM文件到Bugly平台"><a href="#1-6-2-上传DSYM文件到Bugly平台" class="headerlink" title="1.6.2 上传DSYM文件到Bugly平台"></a>1.6.2 上传DSYM文件到Bugly平台</h4><ul>
+<li><strong>手动上传</strong>：登录Bugly平台，在应用管理页面中找到“符号表管理”选项，点击“上传符号表”按钮，选择对应的DSYM文件进行上传。</li>
+<li><strong>脚本上传</strong>：Bugly提供了脚本工具，可以通过命令行的方式上传DSYM文件。首先，下载Bugly提供的符号表上传脚本，然后在终端中执行以下命令：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python buglySymboliOS.py -i [DSYM文件路径] -u [Bugly App ID] -k [Bugly App Key]</span><br></pre></td></tr></table></figure>
+将<code>[DSYM文件路径]</code>替换为实际的DSYM文件路径，<code>[Bugly App ID]</code>和<code>[Bugly App Key]</code>替换为你在Bugly平台上申请的App ID和App Key。</li>
+</ul>
+<h3 id="1-7-查看Bugly崩溃报告"><a href="#1-7-查看Bugly崩溃报告" class="headerlink" title="1.7 查看Bugly崩溃报告"></a>1.7 查看Bugly崩溃报告</h3><p>集成Bugly并运行应用后，当应用发生崩溃时，Bugly会自动收集崩溃信息并上传到Bugly平台。我们可以登录Bugly平台，查看详细的崩溃报告，包括崩溃的堆栈信息、设备信息、用户信息等，从而定位和解决崩溃问题。</p>
+<h2 id="二、用户数量统计：使用友盟"><a href="#二、用户数量统计：使用友盟" class="headerlink" title="二、用户数量统计：使用友盟"></a>二、用户数量统计：使用友盟</h2><h3 id="2-1-友盟简介"><a href="#2-1-友盟简介" class="headerlink" title="2.1 友盟简介"></a>2.1 友盟简介</h3><p>友盟是一家提供移动应用统计分析服务的平台，它可以帮助开发者统计应用的用户数量、用户留存率、用户活跃度等信息，为应用的运营和推广提供数据支持。</p>
+<h3 id="2-2-集成友盟"><a href="#2-2-集成友盟" class="headerlink" title="2.2 集成友盟"></a>2.2 集成友盟</h3><p>同样可以通过CocoaPods进行集成，在<code>Podfile</code>中添加以下内容：</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pod <span class="string">&#x27;UMCommon&#x27;</span></span><br><span class="line">pod <span class="string">&#x27;UMAnalytics&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>然后执行<code>pod install</code>命令进行安装。</p>
+<h3 id="2-3-初始化友盟"><a href="#2-3-初始化友盟" class="headerlink" title="2.3 初始化友盟"></a>2.3 初始化友盟</h3><p>在<code>AppDelegate.m</code>文件中进行友盟的初始化：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#import &quot;AppDelegate.h&quot;</span><br><span class="line">#import &lt;UMCommon/UMCommon.h&gt;</span><br><span class="line">#import &lt;UMAnalytics/MobClick.h&gt;</span><br><span class="line"></span><br><span class="line">@implementation AppDelegate</span><br><span class="line"></span><br><span class="line">- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions &#123;</span><br><span class="line">    // 初始化友盟</span><br><span class="line">    [UMConfigure initWithAppkey:@&quot;your_app_key&quot; channel:@&quot;App Store&quot;];</span><br><span class="line">    [MobClick startWithConfigure:[UMAnalyticsConfig new]];</span><br><span class="line">    return YES;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>将<code>your_app_key</code>替换为你在友盟平台上申请的App Key。</p>
+<h3 id="2-4-统计用户数量"><a href="#2-4-统计用户数量" class="headerlink" title="2.4 统计用户数量"></a>2.4 统计用户数量</h3><p>友盟会自动统计应用的新增用户数和活跃用户数。我们可以登录友盟平台，在“统计分析”模块中查看这些数据。新增用户数表示第一次使用应用的用户数量，活跃用户数表示在一定时间内使用过应用的用户数量。</p>
+<h3 id="2-5-友盟实现原理"><a href="#2-5-友盟实现原理" class="headerlink" title="2.5 友盟实现原理"></a>2.5 友盟实现原理</h3><p>友盟统计用户数量的实现原理主要基于设备标识和事件记录：</p>
+<ul>
+<li><strong>设备标识</strong>：友盟通过获取设备的唯一标识（如IDFA、IDFV等）来区分不同的设备和用户。当应用启动时，友盟SDK会将设备标识上传到友盟服务器。</li>
+<li><strong>新增用户统计</strong>：当一个新的设备标识首次上传到友盟服务器时，友盟会将该设备对应的用户记录为新增用户。</li>
+<li><strong>活跃用户统计</strong>：友盟通过记录应用的启动事件来统计活跃用户。当应用启动时，友盟SDK会向服务器发送启动事件，服务器根据事件的时间戳来判断用户是否为活跃用户。</li>
+</ul>
+<h2 id="三、埋点统计功能用户数量"><a href="#三、埋点统计功能用户数量" class="headerlink" title="三、埋点统计功能用户数量"></a>三、埋点统计功能用户数量</h2><h3 id="3-1-埋点统计简介"><a href="#3-1-埋点统计简介" class="headerlink" title="3.1 埋点统计简介"></a>3.1 埋点统计简介</h3><p>埋点统计是指在应用的关键位置插入代码，记录用户的操作行为，从而统计使用某个功能的用户数量。通过埋点统计，我们可以了解用户对不同功能的使用情况，为功能优化和产品决策提供依据。</p>
+<h3 id="3-2-使用友盟进行埋点统计"><a href="#3-2-使用友盟进行埋点统计" class="headerlink" title="3.2 使用友盟进行埋点统计"></a>3.2 使用友盟进行埋点统计</h3><p>友盟提供了丰富的埋点统计功能，我们可以使用友盟的API进行埋点。</p>
+<h4 id="3-2-1-简单埋点"><a href="#3-2-1-简单埋点" class="headerlink" title="3.2.1 简单埋点"></a>3.2.1 简单埋点</h4><p>在需要统计的功能入口处添加埋点代码。</p>
+<p><strong>示例代码</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 在某个功能按钮的点击事件中添加埋点</span><br><span class="line">- (IBAction)buttonClicked:(id)sender &#123;</span><br><span class="line">    [MobClick event:@&quot;function_click&quot;];</span><br><span class="line">    // 执行功能逻辑</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在友盟平台上，我们可以通过“事件分析”模块查看<code>function_click</code>事件的触发次数和触发用户数，从而统计使用该功能的用户数量。</p>
+<h4 id="3-2-2-带参数的埋点"><a href="#3-2-2-带参数的埋点" class="headerlink" title="3.2.2 带参数的埋点"></a>3.2.2 带参数的埋点</h4><p>如果需要统计不同条件下的功能使用情况，可以使用带参数的埋点。</p>
+<p><strong>示例代码</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 在某个功能按钮的点击事件中添加带参数的埋点</span><br><span class="line">- (IBAction)buttonClicked:(id)sender &#123;</span><br><span class="line">    NSDictionary *parameters = @&#123;@&quot;type&quot;: @&quot;type1&quot;, @&quot;value&quot;: @&quot;value1&quot;&#125;;</span><br><span class="line">    [MobClick event:@&quot;function_click&quot; attributes:parameters];</span><br><span class="line">    // 执行功能逻辑</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在友盟平台上，我们可以根据参数进行筛选和分析，了解不同条件下的功能使用情况。</p>
+<h3 id="3-3-埋点统计实现原理"><a href="#3-3-埋点统计实现原理" class="headerlink" title="3.3 埋点统计实现原理"></a>3.3 埋点统计实现原理</h3><p>埋点统计的实现原理主要基于事件记录和数据上传：</p>
+<ul>
+<li><strong>事件记录</strong>：在应用中插入埋点代码后，当用户触发相应的操作时，SDK会记录该事件，并将事件信息（如事件名称、参数等）保存到本地。</li>
+<li><strong>数据上传</strong>：SDK会在合适的时机（如应用进入后台、网络连接良好等）将本地记录的事件信息上传到服务器。</li>
+<li><strong>数据分析</strong>：服务器接收到事件数据后，会对数据进行分析和统计，计算每个事件的触发次数、触发用户数等信息，开发者可以在统计平台上查看这些数据。</li>
+</ul>
+<h2 id="四、统计用户的操作步骤"><a href="#四、统计用户的操作步骤" class="headerlink" title="四、统计用户的操作步骤"></a>四、统计用户的操作步骤</h2><h3 id="4-1-操作步骤统计简介"><a href="#4-1-操作步骤统计简介" class="headerlink" title="4.1 操作步骤统计简介"></a>4.1 操作步骤统计简介</h3><p>统计用户的操作步骤可以帮助我们了解用户在应用中的使用流程，发现用户可能遇到的问题，从而优化应用的用户体验。</p>
+<h3 id="4-2-使用友盟进行操作步骤统计"><a href="#4-2-使用友盟进行操作步骤统计" class="headerlink" title="4.2 使用友盟进行操作步骤统计"></a>4.2 使用友盟进行操作步骤统计</h3><p>我们可以通过友盟的自定义事件和页面统计功能来统计用户的操作步骤。</p>
+<h4 id="4-2-1-自定义事件统计操作步骤"><a href="#4-2-1-自定义事件统计操作步骤" class="headerlink" title="4.2.1 自定义事件统计操作步骤"></a>4.2.1 自定义事件统计操作步骤</h4><p>在用户的每个操作步骤处添加自定义事件埋点。</p>
+<p><strong>示例代码</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">// 用户进入某个页面</span><br><span class="line">- (void)viewDidAppear:(BOOL)animated &#123;</span><br><span class="line">    [super viewDidAppear:animated];</span><br><span class="line">    [MobClick event:@&quot;step_1_enter_page&quot;];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 用户在页面上进行某个操作</span><br><span class="line">- (IBAction)actionButtonClicked:(id)sender &#123;</span><br><span class="line">    [MobClick event:@&quot;step_2_action&quot;];</span><br><span class="line">    // 执行操作逻辑</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 用户离开页面</span><br><span class="line">- (void)viewDidDisappear:(BOOL)animated &#123;</span><br><span class="line">    [super viewDidDisappear:animated];</span><br><span class="line">    [MobClick event:@&quot;step_3_leave_page&quot;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过在友盟平台上查看这些自定义事件的触发顺序和时间间隔，我们可以了解用户的操作步骤和操作流程。</p>
+<h4 id="4-2-2-页面统计"><a href="#4-2-2-页面统计" class="headerlink" title="4.2.2 页面统计"></a>4.2.2 页面统计</h4><p>友盟还提供了页面统计功能，可以自动统计用户在各个页面的停留时间和访问次数。</p>
+<p><strong>示例代码</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 在ViewController中添加页面统计代码</span><br><span class="line">- (void)viewWillAppear:(BOOL)animated &#123;</span><br><span class="line">    [super viewWillAppear:animated];</span><br><span class="line">    [MobClick beginLogPageView:@&quot;ViewController&quot;];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)viewWillDisappear:(BOOL)animated &#123;</span><br><span class="line">    [super viewWillDisappear:animated];</span><br><span class="line">    [MobClick endLogPageView:@&quot;ViewController&quot;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在友盟平台上，我们可以通过“页面分析”模块查看各个页面的访问情况和用户停留时间，从而了解用户的操作步骤和行为习惯。</p>
+<h3 id="4-3-操作步骤统计实现原理"><a href="#4-3-操作步骤统计实现原理" class="headerlink" title="4.3 操作步骤统计实现原理"></a>4.3 操作步骤统计实现原理</h3><p>操作步骤统计的实现原理与埋点统计类似，主要基于事件记录和数据上传：</p>
+<ul>
+<li><strong>事件记录</strong>：在用户的每个操作步骤处添加自定义事件埋点，当用户触发相应的操作时，SDK会记录该事件，并将事件信息保存到本地。</li>
+<li><strong>数据上传</strong>：SDK会在合适的时机将本地记录的事件信息上传到服务器。</li>
+<li><strong>数据分析</strong>：服务器接收到事件数据后，会根据事件的触发顺序和时间戳进行分析，生成用户的操作步骤和操作流程数据，开发者可以在统计平台上查看这些数据。</li>
+</ul>
+<h2 id="五、其他统计方案"><a href="#五、其他统计方案" class="headerlink" title="五、其他统计方案"></a>五、其他统计方案</h2><h3 id="5-1-Firebase-Analytics"><a href="#5-1-Firebase-Analytics" class="headerlink" title="5.1 Firebase Analytics"></a>5.1 Firebase Analytics</h3><p>Firebase Analytics是Google提供的一款免费的应用分析工具，它可以帮助开发者统计应用的用户行为、事件、用户留存率等信息。集成Firebase Analytics需要在项目中添加Firebase SDK，并在Firebase控制台进行相关配置。</p>
+<h4 id="5-1-1-实现原理"><a href="#5-1-1-实现原理" class="headerlink" title="5.1.1 实现原理"></a>5.1.1 实现原理</h4><p>Firebase Analytics的实现原理基于事件驱动和数据收集：</p>
+<ul>
+<li><strong>事件定义</strong>：开发者可以在应用中定义各种事件，如用户登录、购买商品等。当这些事件发生时，SDK会记录事件信息。</li>
+<li><strong>数据收集</strong>：SDK会收集用户的设备信息、应用使用情况、事件信息等数据，并将这些数据上传到Firebase服务器。</li>
+<li><strong>数据分析</strong>：Firebase服务器会对上传的数据进行分析和处理，生成各种统计报表和可视化图表，开发者可以在Firebase控制台查看这些数据。</li>
+</ul>
+<h3 id="5-2-Flurry-Analytics"><a href="#5-2-Flurry-Analytics" class="headerlink" title="5.2 Flurry Analytics"></a>5.2 Flurry Analytics</h3><p>Flurry Analytics是雅虎提供的一款应用分析工具，它可以提供详细的用户行为分析、广告分析等功能。集成Flurry Analytics需要在项目中添加Flurry SDK，并在Flurry控制台进行相关配置。</p>
+<h4 id="5-2-1-实现原理"><a href="#5-2-1-实现原理" class="headerlink" title="5.2.1 实现原理"></a>5.2.1 实现原理</h4><p>Flurry Analytics的实现原理与友盟和Firebase Analytics类似，主要包括以下几个方面：</p>
+<ul>
+<li><strong>事件跟踪</strong>：在应用中插入Flurry SDK提供的事件跟踪代码，当用户触发相应的操作时，SDK会记录事件信息。</li>
+<li><strong>数据收集</strong>：SDK会收集用户的设备信息、应用使用情况、事件信息等数据，并将这些数据上传到Flurry服务器。</li>
+<li><strong>数据分析</strong>：Flurry服务器会对上传的数据进行分析和处理，生成各种统计报表和分析结果，开发者可以在Flurry控制台查看这些数据。</li>
+</ul>
+<h2 id="六、总结"><a href="#六、总结" class="headerlink" title="六、总结"></a>六、总结</h2><p>开发统计在iOS开发中起着至关重要的作用。通过使用Bugly进行崩溃率统计，我们可以及时发现和解决应用中的崩溃问题，提高应用的稳定性；使用友盟进行用户数量统计、埋点统计和操作步骤统计，我们可以深入了解用户的行为和需求，为应用的优化和推广提供有力的支持。此外，还有其他一些统计方案可供选择，开发者可以根据自己的需求和项目特点选择合适的统计工具。</p>
+<p>希望本文对大家在Objective - C开发中的统计工作有所帮助。</p>
+<p><strong>参考资料</strong>：</p>
+<ul>
+<li>Bugly官方文档：<a target="_blank" rel="noopener" href="https://bugly.qq.com/docs/">https://bugly.qq.com/docs/</a></li>
+<li>友盟官方文档：<a target="_blank" rel="noopener" href="https://developer.umeng.com/docs/">https://developer.umeng.com/docs/</a></li>
+<li>Firebase Analytics官方文档：<a target="_blank" rel="noopener" href="https://firebase.google.com/docs/analytics">https://firebase.google.com/docs/analytics</a></li>
+<li>Flurry Analytics官方文档：<a target="_blank" rel="noopener" href="https://developer.yahoo.com/flurry/docs/">https://developer.yahoo.com/flurry/docs/</a></li>
+</ul>
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/03/04/hello-world/">Hello World</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2022/04/16/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/">探索Objective-C底层 - 架构设计</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">崔鑫</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.27.0">Stellar 1.27.0</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%B4%A9%E6%BA%83%E7%8E%87%E7%BB%9F%E8%AE%A1%EF%BC%9A%E4%BD%BF%E7%94%A8Bugly"><span class="toc-text">一、崩溃率统计：使用Bugly</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-Bugly%E7%AE%80%E4%BB%8B"><span class="toc-text">1.1 Bugly简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E9%9B%86%E6%88%90Bugly"><span class="toc-text">1.2 集成Bugly</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E5%88%9D%E5%A7%8B%E5%8C%96Bugly"><span class="toc-text">1.3 初始化Bugly</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-%E5%8F%AF%E8%83%BD%E9%80%A0%E6%88%90%E5%B4%A9%E6%BA%83%E7%9A%84%E5%9C%B0%E6%96%B9%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="toc-text">1.4 可能造成崩溃的地方及解决方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-1-%E7%A9%BA%E6%8C%87%E9%92%88%E5%BC%82%E5%B8%B8"><span class="toc-text">1.4.1 空指针异常</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-2-%E6%95%B0%E7%BB%84%E8%B6%8A%E7%95%8C"><span class="toc-text">1.4.2 数组越界</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-3-%E6%9C%AA%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8"><span class="toc-text">1.4.3 未实现的方法调用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-4-4-%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F"><span class="toc-text">1.4.4 内存泄漏</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-Bugly%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-text">1.5 Bugly实现原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-6-%E4%B8%8A%E4%BC%A0%E7%AC%A6%E5%8F%B7%E8%A1%A8%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="toc-text">1.6 上传符号表的过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-6-1-%E8%8E%B7%E5%8F%96DSYM%E6%96%87%E4%BB%B6"><span class="toc-text">1.6.1 获取DSYM文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-6-2-%E4%B8%8A%E4%BC%A0DSYM%E6%96%87%E4%BB%B6%E5%88%B0Bugly%E5%B9%B3%E5%8F%B0"><span class="toc-text">1.6.2 上传DSYM文件到Bugly平台</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-7-%E6%9F%A5%E7%9C%8BBugly%E5%B4%A9%E6%BA%83%E6%8A%A5%E5%91%8A"><span class="toc-text">1.7 查看Bugly崩溃报告</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%94%A8%E6%88%B7%E6%95%B0%E9%87%8F%E7%BB%9F%E8%AE%A1%EF%BC%9A%E4%BD%BF%E7%94%A8%E5%8F%8B%E7%9B%9F"><span class="toc-text">二、用户数量统计：使用友盟</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%8F%8B%E7%9B%9F%E7%AE%80%E4%BB%8B"><span class="toc-text">2.1 友盟简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E9%9B%86%E6%88%90%E5%8F%8B%E7%9B%9F"><span class="toc-text">2.2 集成友盟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%8B%E7%9B%9F"><span class="toc-text">2.3 初始化友盟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E7%BB%9F%E8%AE%A1%E7%94%A8%E6%88%B7%E6%95%B0%E9%87%8F"><span class="toc-text">2.4 统计用户数量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E5%8F%8B%E7%9B%9F%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-text">2.5 友盟实现原理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%9F%8B%E7%82%B9%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD%E7%94%A8%E6%88%B7%E6%95%B0%E9%87%8F"><span class="toc-text">三、埋点统计功能用户数量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%9F%8B%E7%82%B9%E7%BB%9F%E8%AE%A1%E7%AE%80%E4%BB%8B"><span class="toc-text">3.1 埋点统计简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E4%BD%BF%E7%94%A8%E5%8F%8B%E7%9B%9F%E8%BF%9B%E8%A1%8C%E5%9F%8B%E7%82%B9%E7%BB%9F%E8%AE%A1"><span class="toc-text">3.2 使用友盟进行埋点统计</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-1-%E7%AE%80%E5%8D%95%E5%9F%8B%E7%82%B9"><span class="toc-text">3.2.1 简单埋点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-2-%E5%B8%A6%E5%8F%82%E6%95%B0%E7%9A%84%E5%9F%8B%E7%82%B9"><span class="toc-text">3.2.2 带参数的埋点</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%9F%8B%E7%82%B9%E7%BB%9F%E8%AE%A1%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-text">3.3 埋点统计实现原理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%BB%9F%E8%AE%A1%E7%94%A8%E6%88%B7%E7%9A%84%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4"><span class="toc-text">四、统计用户的操作步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4%E7%BB%9F%E8%AE%A1%E7%AE%80%E4%BB%8B"><span class="toc-text">4.1 操作步骤统计简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E4%BD%BF%E7%94%A8%E5%8F%8B%E7%9B%9F%E8%BF%9B%E8%A1%8C%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4%E7%BB%9F%E8%AE%A1"><span class="toc-text">4.2 使用友盟进行操作步骤统计</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-1-%E8%87%AA%E5%AE%9A%E4%B9%89%E4%BA%8B%E4%BB%B6%E7%BB%9F%E8%AE%A1%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4"><span class="toc-text">4.2.1 自定义事件统计操作步骤</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-2-%E9%A1%B5%E9%9D%A2%E7%BB%9F%E8%AE%A1"><span class="toc-text">4.2.2 页面统计</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4%E7%BB%9F%E8%AE%A1%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-text">4.3 操作步骤统计实现原理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%85%B6%E4%BB%96%E7%BB%9F%E8%AE%A1%E6%96%B9%E6%A1%88"><span class="toc-text">五、其他统计方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-Firebase-Analytics"><span class="toc-text">5.1 Firebase Analytics</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-1-1-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-text">5.1.1 实现原理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-Flurry-Analytics"><span class="toc-text">5.2 Flurry Analytics</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#5-2-1-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="toc-text">5.2.1 实现原理</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-text">六、总结</span></a></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"codeblock":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.27.0" async></script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || null
+        }
+      });
+    })
+  }
+</script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          loop: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>
