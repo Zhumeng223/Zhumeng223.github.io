@@ -1,0 +1,540 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.27.0" theme-name="Stellar" theme-version="1.27.0">
+  
+  <meta name="generator" content="Hexo 7.1.1">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  
+  <title>探索Objective-C底层 - 多线程技术 - 崔鑫的博客</title>
+
+  
+    <meta name="description" content="引言在iOS开发中，多线程技术是提升应用性能与响应能力的关键。它能让应用在同一时间处理多个任务，避免主线程阻塞，为用户带来流畅的体验。本文将深入探讨Objective - C底层的多线程技术，涵盖原子锁atomic、GCD Timer、NSTimer、CADisplayLink等知识点，并结合示例代码进行详细说明。同时，会着重分析NSTimer和CADisplayLink可能造成的循环引用问题以及">
+<meta property="og:type" content="article">
+<meta property="og:title" content="探索Objective-C底层 - 多线程技术">
+<meta property="og:url" content="http://example.com/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8A%80%E6%9C%AF/index.html">
+<meta property="og:site_name" content="崔鑫的博客">
+<meta property="og:description" content="引言在iOS开发中，多线程技术是提升应用性能与响应能力的关键。它能让应用在同一时间处理多个任务，避免主线程阻塞，为用户带来流畅的体验。本文将深入探讨Objective - C底层的多线程技术，涵盖原子锁atomic、GCD Timer、NSTimer、CADisplayLink等知识点，并结合示例代码进行详细说明。同时，会着重分析NSTimer和CADisplayLink可能造成的循环引用问题以及">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-03-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-03-31T01:10:30.668Z">
+<meta property="article:author" content="崔鑫">
+<meta name="twitter:card" content="summary">
+  
+  
+  
+  
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.27.0">
+
+  
+
+  
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/xaoxuu/favicon/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/xaoxuu/favicon/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/xaoxuu/favicon/favicon-16x16.png"><link rel="manifest" href="/assets/xaoxuu/favicon/site.webmanifest"><link rel="shortcut icon" href="/assets/xaoxuu/favicon/favicon.ico"><meta name="theme-color" content="#f8f8f8"><link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/lxgw-wenkai-screen-webfont/1.7.0/style.min.css" media="all" />
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><div class="icon"><img no-lazy class="icon" src="/images/avatar/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></div><a class="title" href="/"><div class="main" ff="title">崔鑫的博客</div><div class="sub normal cap">活着就是折腾</div><div class="sub hover cap" style="opacity:0"> Life is a struggle</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/%E6%98%93%E5%BF%98%E5%9B%BE/"><span class="title">iOS易忘图</span></a><a class="item title" href="/%E6%8E%A2%E7%B4%A2%20Objective%20-%20C%20%E5%BA%95%E5%B1%82%20-%20%E7%B3%BB%E5%88%97%E5%8D%9A%E5%AE%A2%E5%89%8D%E8%A8%80/"><span class="title">探索Objective-C底层</span></a><a class="item title" href="/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%BC%80%E5%8F%91%E7%BB%9F%E8%AE%A1/"><span class="title">探索Objective-C底层 - 开发统计</span></a><a class="item title" href="/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/"><span class="title">探索Objective-C底层 - 架构设计</span></a><a class="item title" href="/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"><span class="title">探索Objective-C底层 - 性能优化</span></a><a class="item title" href="/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/"><span class="title">探索Objective-C底层 - 内存管理</span></a><a class="item title" href="/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8A%80%E6%9C%AF/"><span class="title">探索Objective-C底层 - 多线程技术</span></a><a class="item title" href="/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E7%BA%BF%E7%A8%8B%E9%94%81/"><span class="title">探索Objective-C底层 - 线程锁</span></a><a class="item title" href="/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20GCD/"><span class="title">探索Objective-C底层 - GCD</span></a><a class="item title" href="/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%BB%8B%E7%BB%8D/"><span class="title">探索Objective-C底层 - 多线程介绍</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/iOS/">iOS</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/iOS/Objective-C%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86/">Objective-C底层原理</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2022-03-19T16:00:00.000Z">2022-03-20</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2025-03-31T01:10:30.668Z">2025-03-31</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>探索Objective-C底层 - 多线程技术</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>在iOS开发中，多线程技术是提升应用性能与响应能力的关键。它能让应用在同一时间处理多个任务，避免主线程阻塞，为用户带来流畅的体验。本文将深入探讨Objective - C底层的多线程技术，涵盖原子锁<code>atomic</code>、GCD Timer、<code>NSTimer</code>、<code>CADisplayLink</code>等知识点，并结合示例代码进行详细说明。同时，会着重分析<code>NSTimer</code>和<code>CADisplayLink</code>可能造成的循环引用问题以及相应的解决办法。</p>
+<h2 id="一、原子锁-atomic"><a href="#一、原子锁-atomic" class="headerlink" title="一、原子锁 atomic"></a>一、原子锁 <code>atomic</code></h2><h3 id="1-1-原理"><a href="#1-1-原理" class="headerlink" title="1.1 原理"></a>1.1 原理</h3><p>在Objective - C中，<code>atomic</code> 是属性声明时的一个修饰符。当一个属性被声明为 <code>atomic</code> 时，编译器会自动生成一些额外的代码来保证该属性的 <code>setter</code> 和 <code>getter</code> 方法是原子操作。也就是说，在多线程环境下，同一时间只会有一个线程对该属性进行读写操作，从而避免数据竞争。</p>
+<h3 id="1-2-使用示例"><a href="#1-2-使用示例" class="headerlink" title="1.2 使用示例"></a>1.2 使用示例</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">#import &lt;Foundation/Foundation.h&gt;</span><br><span class="line"></span><br><span class="line">@interface AtomicExample : NSObject</span><br><span class="line">@property (atomic, assign) NSInteger counter;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation AtomicExample</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">int main(int argc, const char * argv[]) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        AtomicExample *example = [[AtomicExample alloc] init];</span><br><span class="line"></span><br><span class="line">        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);</span><br><span class="line"></span><br><span class="line">        dispatch_async(queue, ^&#123;</span><br><span class="line">            for (int i = 0; i &lt; 10000; i++) &#123;</span><br><span class="line">                example.counter++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        dispatch_async(queue, ^&#123;</span><br><span class="line">            for (int i = 0; i &lt; 10000; i++) &#123;</span><br><span class="line">                example.counter++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        sleep(2);</span><br><span class="line">        NSLog(@&quot;Counter value: %ld&quot;, (long)example.counter);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="1-3-优缺点"><a href="#1-3-优缺点" class="headerlink" title="1.3 优缺点"></a>1.3 优缺点</h3><ul>
+<li><strong>优点</strong>：使用方便，只需要在属性声明时添加 <code>atomic</code> 修饰符，编译器会自动处理线程安全问题。</li>
+<li><strong>缺点</strong>：<code>atomic</code> 只能保证属性的 <code>setter</code> 和 <code>getter</code> 方法是原子操作，但不能保证整个操作的原子性。例如，对于 <code>self.counter++</code> 操作，它包含了读取、加一和写入三个步骤，<code>atomic</code> 无法保证这三个步骤的原子性。而且，<code>atomic</code> 会带来一定的性能开销，因为它需要进行额外的锁操作。</li>
+</ul>
+<h2 id="二、GCD-Timer"><a href="#二、GCD-Timer" class="headerlink" title="二、GCD Timer"></a>二、GCD Timer</h2><h3 id="2-1-原理"><a href="#2-1-原理" class="headerlink" title="2.1 原理"></a>2.1 原理</h3><p>GCD Timer 是基于 Grand Central Dispatch（GCD）实现的定时器。GCD 是苹果提供的一套多线程编程解决方案，它将任务封装成块（block）并放入队列中执行。GCD Timer 利用 GCD 的特性，在指定的时间间隔内重复执行任务。</p>
+<h3 id="2-2-使用示例"><a href="#2-2-使用示例" class="headerlink" title="2.2 使用示例"></a>2.2 使用示例</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">#import &lt;Foundation/Foundation.h&gt;</span><br><span class="line"></span><br><span class="line">@interface GCDTimerExample : NSObject</span><br><span class="line">@property (nonatomic, strong) dispatch_source_t timer;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation GCDTimerExample</span><br><span class="line"></span><br><span class="line">- (void)startTimer &#123;</span><br><span class="line">    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);</span><br><span class="line">    self.timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);</span><br><span class="line"></span><br><span class="line">    // 设置定时器的开始时间、间隔和精度</span><br><span class="line">    dispatch_time_t start = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC));</span><br><span class="line">    uint64_t interval = (uint64_t)(1.0 * NSEC_PER_SEC);</span><br><span class="line">    dispatch_source_set_timer(self.timer, start, interval, 0);</span><br><span class="line"></span><br><span class="line">    // 设置定时器的回调函数</span><br><span class="line">    __weak typeof(self) weakSelf = self;</span><br><span class="line">    dispatch_source_set_event_handler(self.timer, ^&#123;</span><br><span class="line">        [weakSelf timerFired];</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    // 启动定时器</span><br><span class="line">    dispatch_resume(self.timer);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)timerFired &#123;</span><br><span class="line">    NSLog(@&quot;GCD Timer fired&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)stopTimer &#123;</span><br><span class="line">    if (self.timer) &#123;</span><br><span class="line">        dispatch_source_cancel(self.timer);</span><br><span class="line">        self.timer = nil;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">int main(int argc, const char * argv[]) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        GCDTimerExample *example = [[GCDTimerExample alloc] init];</span><br><span class="line">        [example startTimer];</span><br><span class="line"></span><br><span class="line">        sleep(5);</span><br><span class="line">        [example stopTimer];</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-优缺点"><a href="#2-3-优缺点" class="headerlink" title="2.3 优缺点"></a>2.3 优缺点</h3><ul>
+<li><strong>优点</strong>：精度高，不会受到 RunLoop 的影响；可以在后台线程执行任务，不影响主线程的响应；可以通过 <code>dispatch_source_set_timer</code> 方法灵活设置定时器的开始时间、间隔和精度。</li>
+<li><strong>缺点</strong>：使用相对复杂，需要手动管理定时器的创建、启动和停止。</li>
+</ul>
+<h2 id="三、NSTimer"><a href="#三、NSTimer" class="headerlink" title="三、NSTimer"></a>三、NSTimer</h2><h3 id="3-1-原理"><a href="#3-1-原理" class="headerlink" title="3.1 原理"></a>3.1 原理</h3><p><code>NSTimer</code> 是基于 RunLoop 实现的定时器。RunLoop 是一个事件循环机制，负责处理各种事件，如触摸事件、定时器事件等。当创建一个 <code>NSTimer</code> 并将其添加到 RunLoop 中时，RunLoop 会在指定的时间间隔内触发定时器事件。</p>
+<h3 id="3-2-使用示例"><a href="#3-2-使用示例" class="headerlink" title="3.2 使用示例"></a>3.2 使用示例</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">#import &lt;Foundation/Foundation.h&gt;</span><br><span class="line"></span><br><span class="line">@interface NSTimerExample : NSObject</span><br><span class="line">@property (nonatomic, strong) NSTimer *timer;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation NSTimerExample</span><br><span class="line"></span><br><span class="line">- (void)startTimer &#123;</span><br><span class="line">    self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0</span><br><span class="line">                                                  target:self</span><br><span class="line">                                                selector:@selector(timerFired)</span><br><span class="line">                                                userInfo:nil</span><br><span class="line">                                                 repeats:YES];</span><br><span class="line">    [[NSRunLoop currentRunLoop] addTimer:self.timer forMode:NSRunLoopCommonModes];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)timerFired &#123;</span><br><span class="line">    NSLog(@&quot;NSTimer fired&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)stopTimer &#123;</span><br><span class="line">    if (self.timer) &#123;</span><br><span class="line">        [self.timer invalidate];</span><br><span class="line">        self.timer = nil;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">int main(int argc, const char * argv[]) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        NSTimerExample *example = [[NSTimerExample alloc] init];</span><br><span class="line">        [example startTimer];</span><br><span class="line"></span><br><span class="line">        sleep(5);</span><br><span class="line">        [example stopTimer];</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-3-循环引用问题"><a href="#3-3-循环引用问题" class="headerlink" title="3.3 循环引用问题"></a>3.3 循环引用问题</h3><p>在上述示例中，<code>NSTimer</code> 的 <code>target</code> 是 <code>self</code>，这会导致循环引用问题。<code>NSTimer</code> 会强引用 <code>target</code>，而 <code>target</code> 又持有 <code>NSTimer</code> 的引用，当 <code>target</code> 所在的对象需要被释放时，由于 <code>NSTimer</code> 对其的强引用，对象无法被释放，从而造成内存泄漏。</p>
+<h3 id="3-4-解决办法"><a href="#3-4-解决办法" class="headerlink" title="3.4 解决办法"></a>3.4 解决办法</h3><h4 id="3-4-1-使用中间对象（NSProxy）"><a href="#3-4-1-使用中间对象（NSProxy）" class="headerlink" title="3.4.1 使用中间对象（NSProxy）"></a>3.4.1 使用中间对象（NSProxy）</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">#import &lt;Foundation/Foundation.h&gt;</span><br><span class="line"></span><br><span class="line">@interface WeakProxy : NSProxy</span><br><span class="line">@property (nonatomic, weak, readonly) id target;</span><br><span class="line">- (instancetype)initWithTarget:(id)target;</span><br><span class="line">+ (instancetype)proxyWithTarget:(id)target;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation WeakProxy</span><br><span class="line">- (instancetype)initWithTarget:(id)target &#123;</span><br><span class="line">    _target = target;</span><br><span class="line">    return self;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (instancetype)proxyWithTarget:(id)target &#123;</span><br><span class="line">    return [[WeakProxy alloc] initWithTarget:target];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (NSMethodSignature *)methodSignatureForSelector:(SEL)sel &#123;</span><br><span class="line">    return [self.target methodSignatureForSelector:sel];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)forwardInvocation:(NSInvocation *)invocation &#123;</span><br><span class="line">    [invocation invokeWithTarget:self.target];</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@interface NSTimerProxyExample : NSObject</span><br><span class="line">@property (nonatomic, strong) NSTimer *timer;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation NSTimerProxyExample</span><br><span class="line"></span><br><span class="line">- (void)startTimer &#123;</span><br><span class="line">    WeakProxy *proxy = [WeakProxy proxyWithTarget:self];</span><br><span class="line">    self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0</span><br><span class="line">                                                  target:proxy</span><br><span class="line">                                                selector:@selector(timerFired)</span><br><span class="line">                                                userInfo:nil</span><br><span class="line">                                                 repeats:YES];</span><br><span class="line">    [[NSRunLoop currentRunLoop] addTimer:self.timer forMode:NSRunLoopCommonModes];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)timerFired &#123;</span><br><span class="line">    NSLog(@&quot;NSTimer fired&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)stopTimer &#123;</span><br><span class="line">    if (self.timer) &#123;</span><br><span class="line">        [self.timer invalidate];</span><br><span class="line">        self.timer = nil;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>使用 <code>NSProxy</code> 作为中间对象，<code>NSTimer</code> 强引用 <code>NSProxy</code>，而 <code>NSProxy</code> 弱引用 <code>target</code>，避免了循环引用。</p>
+<h4 id="3-4-2-在合适的时机手动停止定时器"><a href="#3-4-2-在合适的时机手动停止定时器" class="headerlink" title="3.4.2 在合适的时机手动停止定时器"></a>3.4.2 在合适的时机手动停止定时器</h4><p>在 <code>target</code> 即将被释放时，手动调用 <code>invalidate</code> 方法停止定时器，打破循环引用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">- (void)dealloc &#123;</span><br><span class="line">    [self.timer invalidate];</span><br><span class="line">    self.timer = nil;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-5-优缺点"><a href="#3-5-优缺点" class="headerlink" title="3.5 优缺点"></a>3.5 优缺点</h3><ul>
+<li><strong>优点</strong>：使用简单，只需要创建一个 <code>NSTimer</code> 并将其添加到 RunLoop 中即可；可以方便地设置定时器的时间间隔、是否重复等属性。</li>
+<li><strong>缺点</strong>：精度相对较低，因为它依赖于 RunLoop 的运行状态。如果 RunLoop 被阻塞，定时器可能会延迟触发；只能在主线程或指定的 RunLoop 中运行；容易造成循环引用问题。</li>
+</ul>
+<h2 id="四、CADisplayLink"><a href="#四、CADisplayLink" class="headerlink" title="四、CADisplayLink"></a>四、CADisplayLink</h2><h3 id="4-1-原理"><a href="#4-1-原理" class="headerlink" title="4.1 原理"></a>4.1 原理</h3><p><code>CADisplayLink</code> 是一个与屏幕刷新率同步的定时器，它会在每次屏幕刷新时触发一次回调。<code>CADisplayLink</code> 通常用于实现动画效果，因为它可以保证动画的流畅性。</p>
+<h3 id="4-2-使用示例"><a href="#4-2-使用示例" class="headerlink" title="4.2 使用示例"></a>4.2 使用示例</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">#import &lt;Foundation/Foundation.h&gt;</span><br><span class="line">#import &lt;QuartzCore/QuartzCore.h&gt;</span><br><span class="line"></span><br><span class="line">@interface CADisplayLinkExample : NSObject</span><br><span class="line">@property (nonatomic, strong) CADisplayLink *displayLink;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation CADisplayLinkExample</span><br><span class="line"></span><br><span class="line">- (void)startDisplayLink &#123;</span><br><span class="line">    self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkFired)];</span><br><span class="line">    [self.displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)displayLinkFired &#123;</span><br><span class="line">    NSLog(@&quot;CADisplayLink fired&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)stopDisplayLink &#123;</span><br><span class="line">    if (self.displayLink) &#123;</span><br><span class="line">        [self.displayLink invalidate];</span><br><span class="line">        self.displayLink = nil;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">int main(int argc, const char * argv[]) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        CADisplayLinkExample *example = [[CADisplayLinkExample alloc] init];</span><br><span class="line">        [example startDisplayLink];</span><br><span class="line"></span><br><span class="line">        sleep(5);</span><br><span class="line">        [example stopDisplayLink];</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="4-3-循环引用问题"><a href="#4-3-循环引用问题" class="headerlink" title="4.3 循环引用问题"></a>4.3 循环引用问题</h3><p>与 <code>NSTimer</code> 类似，<code>CADisplayLink</code> 的 <code>target</code> 强引用 <code>self</code>，而 <code>self</code> 又持有 <code>CADisplayLink</code> 的引用，会造成循环引用，导致 <code>self</code> 无法被释放，造成内存泄漏。</p>
+<h3 id="4-4-解决办法"><a href="#4-4-解决办法" class="headerlink" title="4.4 解决办法"></a>4.4 解决办法</h3><h4 id="4-4-1-使用中间对象（NSProxy）"><a href="#4-4-1-使用中间对象（NSProxy）" class="headerlink" title="4.4.1 使用中间对象（NSProxy）"></a>4.4.1 使用中间对象（NSProxy）</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">#import &lt;Foundation/Foundation.h&gt;</span><br><span class="line">#import &lt;QuartzCore/QuartzCore.h&gt;</span><br><span class="line"></span><br><span class="line">@interface WeakProxy : NSProxy</span><br><span class="line">@property (nonatomic, weak, readonly) id target;</span><br><span class="line">- (instancetype)initWithTarget:(id)target;</span><br><span class="line">+ (instancetype)proxyWithTarget:(id)target;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation WeakProxy</span><br><span class="line">- (instancetype)initWithTarget:(id)target &#123;</span><br><span class="line">    _target = target;</span><br><span class="line">    return self;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (instancetype)proxyWithTarget:(id)target &#123;</span><br><span class="line">    return [[WeakProxy alloc] initWithTarget:target];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (NSMethodSignature *)methodSignatureForSelector:(SEL)sel &#123;</span><br><span class="line">    return [self.target methodSignatureForSelector:sel];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)forwardInvocation:(NSInvocation *)invocation &#123;</span><br><span class="line">    [invocation invokeWithTarget:self.target];</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@interface CADisplayLinkProxyExample : NSObject</span><br><span class="line">@property (nonatomic, strong) CADisplayLink *displayLink;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation CADisplayLinkProxyExample</span><br><span class="line"></span><br><span class="line">- (void)startDisplayLink &#123;</span><br><span class="line">    WeakProxy *proxy = [WeakProxy proxyWithTarget:self];</span><br><span class="line">    self.displayLink = [CADisplayLink displayLinkWithTarget:proxy selector:@selector(displayLinkFired)];</span><br><span class="line">    [self.displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)displayLinkFired &#123;</span><br><span class="line">    NSLog(@&quot;CADisplayLink fired&quot;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)stopDisplayLink &#123;</span><br><span class="line">    if (self.displayLink) &#123;</span><br><span class="line">        [self.displayLink invalidate];</span><br><span class="line">        self.displayLink = nil;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>利用 <code>NSProxy</code> 作为中间层，避免了 <code>CADisplayLink</code> 与 <code>target</code> 的循环引用。</p>
+<h4 id="4-4-2-在合适的时机手动停止定时器"><a href="#4-4-2-在合适的时机手动停止定时器" class="headerlink" title="4.4.2 在合适的时机手动停止定时器"></a>4.4.2 在合适的时机手动停止定时器</h4><p>在 <code>target</code> 即将被释放时，手动调用 <code>invalidate</code> 方法停止 <code>CADisplayLink</code>，打破循环引用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">- (void)dealloc &#123;</span><br><span class="line">    [self.displayLink invalidate];</span><br><span class="line">    self.displayLink = nil;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-5-优缺点"><a href="#4-5-优缺点" class="headerlink" title="4.5 优缺点"></a>4.5 优缺点</h3><ul>
+<li><strong>优点</strong>：与屏幕刷新率同步，能够实现流畅的动画效果；可以精确控制动画的帧率。</li>
+<li><strong>缺点</strong>：只能用于实现与屏幕刷新相关的任务，如动画；如果处理任务的时间过长，可能会导致屏幕卡顿；容易造成循环引用问题。</li>
+</ul>
+<h2 id="五、不同多线程技术的比较与选择"><a href="#五、不同多线程技术的比较与选择" class="headerlink" title="五、不同多线程技术的比较与选择"></a>五、不同多线程技术的比较与选择</h2><h3 id="5-1-性能比较"><a href="#5-1-性能比较" class="headerlink" title="5.1 性能比较"></a>5.1 性能比较</h3><ul>
+<li><strong>GCD Timer</strong>：性能较高，因为它基于 GCD 实现，不依赖于 RunLoop，能够在后台线程高效执行任务。</li>
+<li><strong>NSTimer</strong>：性能相对较低，因为它依赖于 RunLoop，当 RunLoop 被阻塞时，定时器的精度会受到影响。</li>
+<li><strong>CADisplayLink</strong>：性能与屏幕刷新率相关，如果处理任务的时间过长，会影响屏幕的流畅性。</li>
+</ul>
+<h3 id="5-2-适用场景"><a href="#5-2-适用场景" class="headerlink" title="5.2 适用场景"></a>5.2 适用场景</h3><ul>
+<li>**原子锁 <code>atomic</code>**：适用于简单的属性读写操作，需要保证属性的线程安全。</li>
+<li><strong>GCD Timer</strong>：适用于需要高精度定时任务的场景，如后台定时数据更新、定时任务执行等。</li>
+<li><strong>NSTimer</strong>：适用于对精度要求不高的定时任务，如简单的倒计时、定时提醒等。</li>
+<li><strong>CADisplayLink</strong>：适用于实现动画效果，如 UI 动画、游戏动画等。</li>
+</ul>
+<h2 id="六、总结"><a href="#六、总结" class="headerlink" title="六、总结"></a>六、总结</h2><p>在Objective - C开发中，掌握多线程技术是提升应用性能和用户体验的关键。原子锁 <code>atomic</code>、GCD Timer、<code>NSTimer</code> 和 <code>CADisplayLink</code> 各有优缺点，适用于不同的场景。同时，<code>NSTimer</code> 和 <code>CADisplayLink</code> 容易造成循环引用问题，开发者需要采取相应的解决办法。希望本文能帮助你深入理解Objective - C底层的多线程技术，在实际开发中灵活运用。</p>
+<p><strong>参考资料</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/">Apple Developer Documentation</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.bignerdranch.com/books/objective-c-programming/">Objective - C Programming: The Big Nerd Ranch Guide</a></li>
+</ul>
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">探索Objective-C底层 - 内存管理</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/%E6%8E%A2%E7%B4%A2Objective%20-%20C%E5%BA%95%E5%B1%82%20-%20%E7%BA%BF%E7%A8%8B%E9%94%81/">探索Objective-C底层 - 线程锁</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">崔鑫</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.27.0">Stellar 1.27.0</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%8E%9F%E5%AD%90%E9%94%81-atomic"><span class="toc-text">一、原子锁 atomic</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%8E%9F%E7%90%86"><span class="toc-text">1.1 原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="toc-text">1.2 使用示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-text">1.3 优缺点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81GCD-Timer"><span class="toc-text">二、GCD Timer</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%8E%9F%E7%90%86"><span class="toc-text">2.1 原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="toc-text">2.2 使用示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-text">2.3 优缺点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81NSTimer"><span class="toc-text">三、NSTimer</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%8E%9F%E7%90%86"><span class="toc-text">3.1 原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="toc-text">3.2 使用示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8%E9%97%AE%E9%A2%98"><span class="toc-text">3.3 循环引用问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95"><span class="toc-text">3.4 解决办法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-4-1-%E4%BD%BF%E7%94%A8%E4%B8%AD%E9%97%B4%E5%AF%B9%E8%B1%A1%EF%BC%88NSProxy%EF%BC%89"><span class="toc-text">3.4.1 使用中间对象（NSProxy）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-4-2-%E5%9C%A8%E5%90%88%E9%80%82%E7%9A%84%E6%97%B6%E6%9C%BA%E6%89%8B%E5%8A%A8%E5%81%9C%E6%AD%A2%E5%AE%9A%E6%97%B6%E5%99%A8"><span class="toc-text">3.4.2 在合适的时机手动停止定时器</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-text">3.5 优缺点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81CADisplayLink"><span class="toc-text">四、CADisplayLink</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%8E%9F%E7%90%86"><span class="toc-text">4.1 原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="toc-text">4.2 使用示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8%E9%97%AE%E9%A2%98"><span class="toc-text">4.3 循环引用问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95"><span class="toc-text">4.4 解决办法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-1-%E4%BD%BF%E7%94%A8%E4%B8%AD%E9%97%B4%E5%AF%B9%E8%B1%A1%EF%BC%88NSProxy%EF%BC%89"><span class="toc-text">4.4.1 使用中间对象（NSProxy）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-4-2-%E5%9C%A8%E5%90%88%E9%80%82%E7%9A%84%E6%97%B6%E6%9C%BA%E6%89%8B%E5%8A%A8%E5%81%9C%E6%AD%A2%E5%AE%9A%E6%97%B6%E5%99%A8"><span class="toc-text">4.4.2 在合适的时机手动停止定时器</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-text">4.5 优缺点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%B8%8D%E5%90%8C%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%8A%80%E6%9C%AF%E7%9A%84%E6%AF%94%E8%BE%83%E4%B8%8E%E9%80%89%E6%8B%A9"><span class="toc-text">五、不同多线程技术的比较与选择</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83"><span class="toc-text">5.1 性能比较</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-text">5.2 适用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-text">六、总结</span></a></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"codeblock":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.27.0" async></script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || null
+        }
+      });
+    })
+  }
+</script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          loop: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script><script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>
